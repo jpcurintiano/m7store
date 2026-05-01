@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>M7 STORE</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.6)),
+    url("site/fundo.png");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: white;
+}
+
+.container {
+  width: 100%;
+  max-width: 390px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(212,175,55,0.6);
+  border-radius: 22px;
+  padding: 22px;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 25px rgba(212,175,55,0.25);
+}
+
+.logo {
+  width: 110px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 15px gold);
+}
+
+h1 {
+  color: #d4af37;
+  font-size: 28px;
+}
+
+.subtitulo {
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+.subtitulo strong {
+  color: gold;
+}
+
+.preco {
+  font-size: 34px;
+  font-weight: bold;
+  color: gold;
+  margin: 10px 0;
+}
+
+/* LISTA COM LOGOS */
+.lista {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: 0.2s;
+}
+
+.item:hover {
+  transform: scale(1.04);
+  border-color: gold;
+}
+
+.item img {
+  width: 24px;
+}
+
+.item span {
+  font-weight: bold;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid gold;
+  background: rgba(0,0,0,0.6);
+  color: white;
+}
+
+/* BOTÃO */
+.btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #d4af37, #fff3b0);
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+/* QR */
+#qr img {
+  width: 200px;
+  margin-top: 15px;
+  background: white;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.erro { color: red; }
+.sucesso { color: gold; }
+
+/* MOBILE */
+@media (max-width: 420px) {
+  .lista {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <img src="site/logo.png" class="logo">
+
+  <h1>M7 STORE</h1>
+
+  <p class="subtitulo">
+    Compre o <strong>pacote de streaming</strong> por apenas 
+    <strong>R$29,90</strong>
+  </p>
+
+  <div class="preco">R$29,90</div>
+
+  <div class="lista">
+
+    <div class="item"><img src="logos/netflix.png"><span>Netflix</span></div>
+    <div class="item"><img src="logos/hbo.png"><span>HBO Max</span></div>
+    <div class="item"><img src="logos/disney.png"><span>Disney+</span></div>
+    <div class="item"><img src="logos/prime.png"><span>Prime Video</span></div>
+    <div class="item"><img src="logos/paramount.png"><span>Paramount+</span></div>
+    <div class="item"><img src="logos/globo.png"><span>Globoplay</span></div>
+    <div class="item"><img src="logos/premiere.png"><span>Premiere</span></div>
+    <div class="item"><img src="logos/sporttv.png"><span>SporTV</span></div>
+    <div class="item"><img src="logos/espn.png"><span>ESPN</span></div>
+    <div class="item"><img src="logos/appletv.png"><span>Apple TV+</span></div>
+
+  </div>
+
+  <input id="email" placeholder="Digite seu e-mail">
+
+  <button class="btn" onclick="gerarPix()">COMPRAR AGORA</button>
+
+  <div id="mensagem"></div>
+  <div id="qr"></div>
+
+</div>
+
+<script>
+const API_URL = "https://m7-store-api.onrender.com";
+
+async function gerarPix() {
+  const email = document.getElementById("email").value;
+  const msg = document.getElementById("mensagem");
+  const qr = document.getElementById("qr");
+
+  msg.innerHTML = "";
+  qr.innerHTML = "";
+
+  if (!email.includes("@")) {
+    msg.innerHTML = '<p class="erro">Digite um e-mail válido</p>';
+    return;
+  }
+
+  msg.innerHTML = '<p class="sucesso">Gerando Pix...</p>';
+
+  try {
+    const res = await fetch(API_URL + "/create-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.innerHTML = '<p class="erro">Erro ao gerar pagamento</p>';
+      return;
+    }
+
+    msg.innerHTML = '<p class="sucesso">Pix gerado!</p>';
+
+    qr.innerHTML = `
+      <img src="data:image/png;base64,${data.qr_base64}">
+      <textarea id="pix">${data.qr_code}</textarea>
+      <button class="btn" onclick="copiar()">Copiar Pix</button>
+    `;
+  } catch {
+    msg.innerHTML = '<p class="erro">Erro na conexão</p>';
+  }
+}
+
+function copiar() {
+  const pix = document.getElementById("pix").value;
+  navigator.clipboard.writeText(pix);
+  alert("Pix copiado!");
+}
+</script>
+
+</body>
+</html>
